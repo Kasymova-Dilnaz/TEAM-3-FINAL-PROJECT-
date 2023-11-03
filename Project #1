@@ -1,0 +1,37 @@
+# TEAM-3-FINAL-PROJECT-
+from PyScanner import PyScanner
+
+# Create a PyScanner instance
+scanner = PyScanner()
+
+# Get a list of available scanners
+available_scanners = scanner.get_scanners()
+
+if not available_scanners:
+    print("No scanners found. Please connect a scanner and try again.")
+else:
+    # Select the first available scanner
+    selected_scanner = available_scanners[0]
+
+    # Set scan settings (you can adjust these as needed)
+    settings = {
+        'source': 'ADF Duplex',  # Scanner source (e.g., ADF Duplex, Flatbed)
+        'resolution': 300,  # Scan resolution (DPI)
+        'color_mode': 'Color',  # Color mode (e.g., Color, Grayscale, Black and White)
+        'format': 'PDF',  # Output file format (e.g., PDF, JPG, PNG)
+    }
+
+    # Perform the scan
+    scan_result = scanner.scan(selected_scanner, **settings)
+
+    # Save the scanned document to a file
+    if scan_result:
+        output_file = "scanned_document.pdf"  # Change the filename and format as needed
+        with open(output_file, 'wb') as f:
+            f.write(scan_result)
+        print(f"Document scanned and saved as {output_file}")
+    else:
+        print("Scanning failed.")
+
+# Close the scanner
+scanner.close()
