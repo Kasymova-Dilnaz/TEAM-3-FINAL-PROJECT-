@@ -1,37 +1,37 @@
 # TEAM-3-FINAL-PROJECT-
-from PyScanner import PyScanner
+import cv2
 
-# Create a PyScanner instance
-scanner = PyScanner()
+def scan_document(image_path):
+    # Read the image
+    image = cv2.imread(image_path)
 
-# Get a list of available scanners
-available_scanners = scanner.get_scanners()
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-if not available_scanners:
-    print("No scanners found. Please connect a scanner and try again.")
-else:
-    # Select the first available scanner
-    selected_scanner = available_scanners[0]
+    # Apply GaussianBlur to reduce noise and help with contour detection
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    # Set scan settings (you can adjust these as needed)
-    settings = {
-        'source': 'ADF Duplex',  # Scanner source (e.g., ADF Duplex, Flatbed)
-        'resolution': 300,  # Scan resolution (DPI)
-        'color_mode': 'Color',  # Color mode (e.g., Color, Grayscale, Black and White)
-        'format': 'PDF',  # Output file format (e.g., PDF, JPG, PNG)
-    }
+    # Use Canny edge detection to find edges in the image
+    edges = cv2.Canny(blurred, 50, 150)
 
-    # Perform the scan
-    scan_result = scanner.scan(selected_scanner, **settings)
+    # Find contours in the edged image
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Save the scanned document to a file
-    if scan_result:
-        output_file = "scanned_document.pdf"  # Change the filename and format as needed
-        with open(output_file, 'wb') as f:
-            f.write(scan_result)
-        print(f"Document scanned and saved as {output_file}")
-    else:
-        print("Scanning failed.")
+    # Sort contours by area and keep the largest one
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
 
-# Close the scanner
-scanner.close()
+    # Create a mask and draw the largest contour on it
+    mask = image.copy()
+    cv2.drawContours(mask, contours, -1, (0, 255, 0), 2)
+
+    # Mask the original image
+    result = cv2.bitwise_and(image, mask)
+
+    # Display the result
+    cv2.imshow("Scanned Document", result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# Replace 'path/to/your/image.jpg' with the actual path to your document image
+scan_document('path/to/your/image.jpg')
+    
