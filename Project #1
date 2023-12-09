@@ -1,37 +1,299 @@
 # TEAM-3-FINAL-PROJECT-
-import cv2
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "7b94b743",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from difflib import SequenceMatcher\n",
+    "import os\n",
+    "from docx import Document"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "fc0f9ca5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def plagiarism_checker(file1, file2):\n",
+    "    # Check if file1 exists\n",
+    "    if not os.path.exists(file1):\n",
+    "        print(f\"Error: File '{file1}' does not exist.\")\n",
+    "        return\n",
+    "\n",
+    "    # Check if file2 exists\n",
+    "    if not os.path.exists(file2):\n",
+    "        print(f\"Error: File '{file2}' does not exist.\")\n",
+    "        return\n",
+    "\n",
+    "    # Detect encoding for file1\n",
+    "    encoding1 = detect_encoding(file1)\n",
+    "\n",
+    "    # Detect encoding for file2\n",
+    "    encoding2 = detect_encoding(file2)\n",
+    "\n",
+    "    try:\n",
+    "        # Process file1\n",
+    "        if file1.lower().endswith('.pdf'):\n",
+    "            # If it's a PDF, extract text from PDF\n",
+    "            pdf_text1 = extract_text_from_pdf(file1)\n",
+    "            file1data = ' '.join(pdf_text1)\n",
+    "        elif file1.lower().endswith('.docx'):\n",
+    "            # If it's a DOCX, extract text from DOCX\n",
+    "            docx_text1 = extract_text_from_docx(file1)\n",
+    "            file1data = ' '.join(docx_text1)\n",
+    "        else:\n",
+    "            # Otherwise, read text from the file\n",
+    "            with open(file1, encoding=encoding1, errors='ignore') as f1:\n",
+    "                file1data = f1.read()\n",
+    "\n",
+    "        # Process file2\n",
+    "        if file2.lower().endswith('.pdf'):\n",
+    "            # If it's a PDF, extract text from PDF\n",
+    "            pdf_text2 = extract_text_from_pdf(file2)\n",
+    "            file2data = ' '.join(pdf_text2)\n",
+    "        elif file2.lower().endswith('.docx'):\n",
+    "            # If it's a DOCX, extract text from DOCX\n",
+"            docx_text2 = extract_text_from_docx(file2)\n",
+    "            file2data = ' '.join(docx_text2)\n",
+    "        else:\n",
+    "            # Otherwise, read text from the file\n",
+    "            with open(file2, encoding=encoding2, errors='ignore') as f2:\n",
+    "                file2data = f2.read()\n",
+    "\n",
+    "        # Calculate similarity using SequenceMatcher\n",
+    "        similarity = SequenceMatcher(None, file1data, file2data).ratio()\n",
+    "        return similarity\n",
+    "\n",
+    "    except Exception as e:\n",
+    "        # Handle exceptions during the plagiarism check\n",
+    "        print(f\"Error during plagiarism check: {e}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "5a4fbbe5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import PyPDF2\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "664bae3e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import chardet \n",
+    "\n",
+    "def detect_encoding(file_path):\n",
+    "    \"\"\"\n",
+    "    Detects the encoding of a file.\n",
+    "\n",
+    "    Parameters:\n",
+    "    - file_path (str): The path to the file.\n",
+    "\n",
+    "    Returns:\n",
+    "    - str: The detected encoding.\n",
+    "    \"\"\"\n",
+    "    # Open the file in binary mode\n",
+    "    with open(file_path, 'rb') as f:\n",
+    "        # Read a portion of the file to determine its encoding\n",
+    "        result = chardet.detect(f.read())\n",
+    "\n",
+    "    # Return the detected encoding\n",
+    "    return result['encoding']\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "441105ef",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import PyPDF2\n",
+    "\n",
+    "def extract_text_from_pdf(pdf_file):\n",
+    "    \"\"\"\n",
+    "    Extracts text from a PDF file.\n",
+    "\n",
+    "    Parameters:\n",
+    "    - pdf_file (str): The path to the PDF file.\n",
+    "\n",
+    "    Returns:\n",
+    "    - list: A list of strings representing the text content of each page.\n",
+    "    \"\"\"\n",
+    "    # Open the PDF file in binary mode\n",
+    "    with open(pdf_file, 'rb') as pdf:\n",
+    "        # Create a PdfReader object from the PDF file\n",
+    "        reader = PyPDF2.PdfReader(pdf, strict=False)\n",
+    "\n",
+    "        # Initialize an empty list to store the text of each page\n",
+    "        pdf_text = []\n",
+    "\n",
+    "        # Iterate through each page in the PDF\n",
+    "        for page_num in range(len(reader.pages)):\n",
+    "            try:\n",
+    "                # Extract text from the current page\n",
+    "                page = reader.pages[page_num]\n",
+    "                content = page.extract_text()\n",
+    "\n",
+    "                # Decode the content to handle encoding issues, ignoring errors\n",
+    "                decoded_content = content.encode('utf-8', 'ignore').decode('utf-8')\n",
+    "\n",
+    "                # Append the decoded content to the list\n",
+    "                pdf_text.append(decoded_content)\n",
+    "\n",
+    "            except Exception as e:\n",
+    "                # Print an error message if there is an issue extracting text from the page\n",
+    "                print(f\"Error extracting text from PDF page {page_num + 1}: {e}\")\n",
+    "\n",
+    "        # Return the list containing the text of each page\n",
+    "        return pdf_text\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "33aa0faa",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text":[ some text ] }
+}
+   ],
+   "source": [
+    "extracted_text = extract_text_from_pdf('midterm_history.pdf')\n",
+    "for text in extracted_text:\n",
+    "    print(text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "890ec7e9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def extract_text_from_docx(docx_file):\n",
+    "    \"\"\"\n",
+    "    Extracts text from a DOCX file.\n",
+    "\n",
+    "    Parameters:\n",
+    "    - docx_file (str): The path to the DOCX file.\n",
+    "\n",
+    "    Returns:\n",
+    "    - list: A list of strings representing the text content of each paragraph.\n",
+    "    \"\"\"\n",
+    "    # Create a Document object from the DOCX file\n",
+    "    doc = Document(docx_file)\n",
+    "\n",
+    "    # Initialize an empty list to store the text of each paragraph\n",
+    "    doc_text = []\n",
+    "\n",
+    "    # Iterate through each paragraph in the document\n",
+    "    for paragraph in doc.paragraphs:\n",
+    "        # Append the text of the current paragraph to the list\n",
+    "        doc_text.append(paragraph.text)\n",
+    "\n",
+    "    # Return the list containing the text of each paragraph\n",
+    "    return doc_text"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "afbf8511",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Enter the path to the first file: 1.txt\n",
+      "Enter the path to the second file: 2.txt\n",
+      "Plagiarism check successful.\n",
+      "The result of the testing is 55.69620253164557% of similarity\n",
+      "Plagiarism detected\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Get file paths from user input\n",
+    "file_path1 = input(\"Enter the path to the first file: \")\n",
+    "file_path2 = input(\"Enter the path to the second file: \")\n",
+    "\n",
+    "# Flag to check if plagiarism check is successful\n",
+    "ok = True\n",
+    "\n",
+    "# Perform plagiarism check\n",
+    "result = plagiarism_checker(file_path1, file_path2)\n",
+    "\n",
+    "# Check if plagiarism check result is not None (successful)\n",
+    "if result is not None:\n",
+    "    # Print success message\n",
+    "    print(f\"Plagiarism check successful.\")\n",
+    "\n",
+    "else:\n",
+    "    # Print error message if plagiarism check fails\n",
+    "    print(\"Error: Please try again.\")\n",
+    "    # Set flag to False to indicate failure\n",
+    "    ok = False\n",
+    "\n",
+    "# Check if plagiarism check was successful\n",
+    "if ok:\n",
+    "    # Print the result of the testing\n",
+    "    print(f'The result of the testing is {result * 100}% of similarity')\n",
+    "\n",
+    "    # Check the similarity percentage and print appropriate message\n",
+    "    if result * 100 < 50:\n",
+    "        print(\"There is no plagiarism\")\n",
+    "    else:\n",
+    "        print(\"Plagiarism detected\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9dd51316",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
 
-def scan_document(image_path):
-    # Read the image
-    image = cv2.imread(image_path)
 
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Apply GaussianBlur to reduce noise and help with contour detection
-    blurred = cv2.GaussianBlur(gray, (10, 10), 0)
-
-    # Use Canny edge detection to find edges in the image
-    edges = cv2.Canny(blurred, 50, 150)
-
-    # Find contours in the edged image
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Sort contours by area and keep the largest one
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
-
-    # Create a mask and draw the largest contour on it
-    mask = image.copy()
-    cv2.drawContours(mask, contours, -1, (0, 255, 0), 2)
-
-    # Mask the original image
-    result = cv2.bitwise_and(image, mask)
-
-    # Display the result
-    cv2.imshow("Scanned Document", result)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-# Replace 'path/to/your/image.jpg' with the actual path to your document image
-scan_document('path/to/your/image.jpg')
     
