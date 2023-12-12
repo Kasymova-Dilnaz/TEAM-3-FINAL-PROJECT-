@@ -170,7 +170,7 @@
     {
      "name": "stdout",
      "output_type": "stream",
-     "text":[ some text ] }
+     "text":[ example text ] }
 }
    ],
    "source": [
