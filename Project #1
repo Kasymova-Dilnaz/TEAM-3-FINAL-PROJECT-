@@ -103,7 +103,7 @@ detect_encoding(file_path)
     
             # Вернуть список, содержащий текст каждой страницы
            return pdf_text
-    extracted_text = extract_text_from_pdf('midterm_history.pdf')
+    extracted_text = extract_text_from_pdf('report_1.pdf')
     for text in extracted_text:
      print(text)
   
