@@ -2,56 +2,55 @@
 
      from difflib import SequenceMatcher
      import os
-     from docx import Document"
+     from docx import Document
  
     def plagiarism_checker(file1, file2):
-        # Check if file1 exists,
+        # Проверим, существует ли файл
        if not os.path.exists(file1),
             print(f\"Error: File '{file1}' does not exist
            return
-        # Check if file2 exists
+        # Проверим, существует ли файл2,
         if not os.path.exists(file2),
            print(f\"Error: File '{file2}' does not exist
             return
-        # Detect encoding for file1,
+        # Определим кодировку для файла1
         encoding1 = detect_encoding(file1)
-        # Detect encoding for file2
+        # Определим кодировку для файла2
         encoding2 = detect_encoding(file2)
 
-            # Process file1
             if file1.lower().endswith('.pdf')
-              # If it's a PDF, extract text from PDF
+              # Если это PDF, извлекаем текст из PDF
                 pdf_text1 = extract_text_from_pdf(file1)
                 file1data = ' '.join(pdf_text1)
             elif file1.lower().endswith('.docx')
-                # If it's a DOCX, extract text from DOCX
+                # Если это DOCX, извлекаем текст из DOCX
                docx_text1 = extract_text_from_docx(file1)
                 file1data = ' '.join(docx_text1)
             else:
-                # Otherwise, read text from the file,
+                # В противном случае прочитаем текст из файла
                 with open(file1, encoding=encoding1, errors='ignore') as f1
                     file1data = f1.read
     
-            # Process file2
+            # Процесс файла
             if file2.lower().endswith('.pdf')
-                # If it's a PDF, extract text from PDF
+                # Если это PDF, извлекаем текст из PDF
                 pdf_text2 = extract_text_from_pdf(file2)
                 file2data = ' '.join(pdf_text2)
             elif file2.lower().endswith('.docx')
-                # If it's a DOCX, extract text from DOCX
+                # Если это DOCX, извлекаем текст из DOCX
             docx_text2 = extract_text_from_docx(file2)
                 file2data = ' '.join(docx_text2)
             else:
-                # Otherwise, read text from the file
+                # В противном случае прочитаем текст из файла
                 with open(file2, encoding=encoding2, errors='ignore') as f2:
                     file2data = f2.read,
   
-            # Calculate similarity using SequenceMatcher
+            # Вычисляем сходство с помощью SequenceMatcher
             similarity = SequenceMatcher(None, file1data, file2data).ratio()
             return similarity
     
       except Exception as e:
-            # Handle exceptions during the plagiarism check
+            # Обработка исключений во время проверки на плагиат
            print(f\"Error during plagiarism check: 
  
  
@@ -67,12 +66,12 @@ detect_encoding(file_path)
         Returns:
         - str: The detected encoding
  
-        # Open the file in binary mode,
+        # Откроем файл в двоичном режиме
         with open(file_path, 'rb') as f:
-            # Read a portion of the file to determine its encoding
+            # Определяем его кодировку.
            result = chardet.detect(f.read(),
    
-       # Return the detected encoding
+       # Вернём обнаруженную кодировку
        return result['encoding']
   import PyPDF2
     def extract_text_from_pdf(pdf_file):
@@ -85,32 +84,25 @@ detect_encoding(file_path)
        Returns:
       - list: A list of strings representing the text content of each page.
   
-        # Open the PDF file in binary mode
+        # Открываем  PDF-файл в двоичном режиме
         with open(pdf_file, 'rb') as pdf:
-            # Create a PdfReader object from the PDF file
+            # Создаём объект PdfReader из файла PDF.
            reader = PyPDF2.PdfReader(pdf, strict=False)
-    
-            # Initialize an empty list to store the text of each page
-            pdf_text = []
-    
-           # Iterate through each page in the PDF",
-            for page_num in range(len(reader.pages)),
-                try:
-                    # Extract text from the current page
-                    page = reader.pages[page_num]
-                    content = page.extract_text()
-                 # Decode the content to handle encoding issues, ignoring errors
+            # Перебрать каждую страницу PDF-файла
+           for page_num in range(len(reader.pages)),
+           try:
+           page = reader.pages[page_num]
+           content = page.extract_text()
+           #Декодируем контент для устранения проблем с кодировкой, игнорируя ошибки.
                    decoded_content = content.encode('utf-8', 'ignore').decode('utf-8')`
-                  # Append the decoded content to the list
+                  # Добавляем декодированный контент в список
                    pdf_text.append(decoded_content)
    
                 except Exception as e:
-                    # Print an error message if there is an issue extracting text from the page
                    print(f\"Error extracting text from PDF page {page_num + 1}:
     
-            # Return the list containing the text of each page
+            # Вернуть список, содержащий текст каждой страницы
            return pdf_text
-
     extracted_text = extract_text_from_pdf('midterm_history.pdf')
     for text in extracted_text:
      print(text)
@@ -121,46 +113,46 @@ detect_encoding(file_path)
       Returns:
         - list: A list of strings representing the text content of each paragraph.
 
-        # Create a Document object from the DOCX file
+        # Создаём объект Document из файла DOCX.
         doc = Document(docx_file)
-Initialize an empty list to store the text of each paragraph
-       doc_text = []
+        Initialize an empty list to store the text of each paragraph
+        doc_text = []
    
-      # Iterate through each paragraph in the document
+      # Перебрать каждый абзац документа.
         for paragraph in doc.paragraphs:
-           # Append the text of the current paragraph to the list
+           # Добавляем текст текущего абзаца в список
            doc_text.append(paragraph.text)
     
-        # Return the list containing the text of each paragraph
+        # Вернём список, содержащий текст каждого абзаца
         return doc_text
 
-    # Get file paths from user input
+    # Получаем путь к файлам из пользовательского ввода
     file_path1 = input(\"Enter the path to the first file: 
     file_path2 = input(\"Enter the path to the second file: 
    
-    # Flag to check if plagiarism check is successful
+    # Пометим, чтобы проверить, прошла ли проверка на плагиат успешно
     ok = True
     
-    # Perform plagiarism check
+    # Провести проверку на плагиат
     result = plagiarism_checker(file_path1, file_path2)
   
-    # Check if plagiarism check result is not None (successful)
+    # Проверяем, не является ли результат проверки на плагиат «Нет» (успешным)
     if result is not None:
-        # Print success message
+        # Распечатаем сообщение об успехе
         print(f\"Plagiarism check successful.
     
     else:
-        # Print error message if plagiarism check fails
+        # Распечатаем сообщение об ошибке, если проверка на плагиат не удалась
         print(\"Error: Please try again.
-        # Set flag to False to indicate failure
+        # Установливаем флаг в значение False, чтобы указать на сбой.
         ok = False
 
-    # Check if plagiarism check was successful\n
+    # Проверяем, прошла ли проверка на плагиат успешно
     if ok:
-      # Print the result of the testing
+      # Распечатываем результат тестирования
       print(f'The result of the testing is {result * 100}% of similarity'
  
-      # Check the similarity percentage and print appropriate message
+      # Проверяем процент сходства и распечатываем соответствующее сообщение.
        if result * 100 < 50:
           print(\"There is no plagiarism\")
       else:\
